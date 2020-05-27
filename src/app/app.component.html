@@ -1,13 +1,12 @@
-<div class="container-fluid">
-  <div class="col-md-offset-1">
-    <h1>
-      Welcome to {{title}}!
-    </h1>
+<mat-toolbar class="navbar" color="primary">
+  <div>DLS</div>
+  <div>
+    <span><a routerLink="/">Dashboard</a></span>
+    <span><a routerLink="/student">Students</a></span>
+    <span><a routerLink="/laptop">Laptops</a></span>
   </div>
+</mat-toolbar>
 
-  <a routerLink="/">Home</a>
-  <a style="margin-left:10px" routerLink="/student">List Students</a>
-  <a style="margin-left:10px" routerLink="/add">Add User</a>
-  <br/>
+<main>
   <router-outlet></router-outlet>
-  </div>
+</main>
