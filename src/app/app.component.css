@@ -1,10 +1,10 @@
 a {
   text-decoration: none;
-  color: white;
+  color: darkblue;
 }
 
 a:hover, a:active {
-  color: lightgray;
+  color: coral;
 }
 
 .navbar {
@@ -22,12 +22,3 @@ span {
   margin: 0;
 }
 
-mat-toolbar {
-  border-radius: 3px;
-}
-
-@media (max-width: 959px) {
-  mat-toolbar {
-    border-radius: 0px;
-  }
-}
