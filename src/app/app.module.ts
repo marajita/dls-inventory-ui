@@ -9,6 +9,7 @@ import {HttpClientModule} from "@angular/common/http";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {PrimengModule} from "./primeng/primeng.module";
 import {MessageService} from "primeng/api";
+import {DropdownModule} from "primeng";
 
 @NgModule({
   declarations: [
@@ -22,7 +23,8 @@ import {MessageService} from "primeng/api";
     HttpClientModule,
     FormsModule,
     ReactiveFormsModule,
-    PrimengModule
+    PrimengModule,
+    DropdownModule
   ],
   providers: [MessageService],
   bootstrap: [AppComponent]

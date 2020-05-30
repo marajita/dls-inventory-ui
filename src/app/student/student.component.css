@@ -1,3 +1,10 @@
 table {
   width: 100%;
 }
+.cell-breakWord {
+  word-wrap: break-word;
+}
+.cell-max-width-4px {
+  max-width: 4px;
+  text-align: center;
+}
