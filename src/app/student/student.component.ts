@@ -16,9 +16,13 @@ export class StudentComponent implements OnInit {
   }
 
   studentList: any;
-  id: number;
+  studentId: number;
   cols: any[];
+  studentHistoryCols: any[];
+
   enableStudentPopup: boolean = false;
+  enableStudentDeletePopup: boolean = false;
+
   studentModalTitle: string = "Loading..";
 
   submitted = false;
@@ -29,12 +33,19 @@ export class StudentComponent implements OnInit {
     netId: new FormControl('', Validators.required),
     firstName: new FormControl('', Validators.required),
     lastName: new FormControl('', Validators.required),
-    dukeEmail: new FormControl('',[Validators.required, Validators.pattern('^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$')]),
+    dukeEmail: new FormControl('', [Validators.required, Validators.pattern('^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$')]),
     altEmail: new FormControl(''),
     programYear: new FormControl('', Validators.required),
     preferredName: new FormControl(''),
 
   });
+
+  studentHistoryForm = new FormGroup({
+    comments: new FormControl('')
+
+  });
+  enableInventoryManagement: boolean = false;
+  studentHistoryList: any[] = [];
 
   get registerFormControl() {
     return this.studentForm.controls;
@@ -49,15 +60,23 @@ export class StudentComponent implements OnInit {
       {field: 'preferredName', header: 'Preferred Name'},
       {field: 'dukeEmail', header: 'Duke Email'},
       {field: 'altEmail', header: 'Alt Email'},
-      {field: 'programYear', header: 'Program Year'}
+      {field: 'programYear', header: 'Program Year'},
+      {field: 'dukeEmail', header: 'Duke Email'},
     ];
 
     this.programYears = [
-      { label: 'All', value: null },
-      { label: 'W2019', value: 'W2019' },
-      { label: 'G2019', value: 'G2019' },
-      { label: 'W2020', value: 'W2020' },
-      { label: 'G2020', value: 'G2020' },
+      {label: 'All', value: null},
+      {label: 'W2019', value: 'W2019'},
+      {label: 'G2019', value: 'G2019'},
+      {label: 'W2020', value: 'W2020'},
+      {label: 'G2020', value: 'G2020'},
+    ];
+
+    this.studentHistoryCols = [
+      {field: 'netId', header: 'Net ID'},
+      {field: 'activityDate', header: 'Activity Date'},
+      {field: 'comments', header: 'Comments'},
+
     ];
 
   }
@@ -65,19 +84,23 @@ export class StudentComponent implements OnInit {
   private getAllStudents() {
     this.studentService.getAllStudents().then((data: Array<any>) => {
       this.studentList = data["studentList"];
-     // this.studentList = this.studentList.slice(); //Triggers data refresh
+      // this.studentList = this.studentList.slice(); //Triggers data refresh
 
       console.log(this.studentList)
     }).catch(data => {
       console.log(data);
     });
+
+    this.studentHistoryList.push({'netId':'bsha452', 'activityDate': '01-01-2020 13:34', 'comments': 'Student entry created'})
+    this.studentHistoryList.push({'netId':'bsha452', 'activityDate': '01-01-2020 14:34', 'comments': 'Laptop assigned - DSFSL23423'})
+
   }
 
   onEditStudentClicked(rowData) {
     this.studentModalTitle = "Edit Student"
     console.log(rowData);
     console.log(rowData.firstName);
-    this.id = rowData.id;
+    this.studentId = rowData.studentId;
     this.studentForm.patchValue({
       netId: rowData.netId,
       firstName: rowData.firstName,
@@ -85,13 +108,14 @@ export class StudentComponent implements OnInit {
       dukeEmail: rowData.dukeEmail,
       altEmail: rowData.altEmail,
       programYear: rowData.programYear,
-      preferredName:rowData.preferredName,
+      preferredName: rowData.preferredName,
     });
     this.enableStudentPopup = true;
   }
 
   onAddStudentClicked() {
     this.studentForm.reset();
+    this.submitted = false;
     this.studentModalTitle = 'Add Student';
     this.enableStudentPopup = true;
   }
@@ -108,7 +132,7 @@ export class StudentComponent implements OnInit {
         console.log(data);
       });
     } else {
-      studentRecord.id = this.id;
+      studentRecord.studentId = this.studentId;
       this.studentService.updateStudent(studentRecord).then(data => {
         console.log("updated");
         this.getAllStudents();
@@ -155,4 +179,29 @@ export class StudentComponent implements OnInit {
   }
 
 
+  onAssignInventoryClicked(rowData) {
+    this.enableInventoryManagement = true;
+  }
+
+  onDeleteStudentClicked(rowData) {
+    this.studentId = rowData.studentId;
+    this.enableStudentDeletePopup = true
+  }
+
+  deleteStudent() {
+    const studentRecord = {
+      studentId: this.studentId,
+    };
+    this.studentService.deactivateStudent(studentRecord).then(data => {
+      console.log("updated");
+      this.getAllStudents();
+      this.enableStudentDeletePopup = false;
+    }).catch(data => {
+      console.log(data);
+    });
+  }
+
+  updateStudentHistory() {
+
+  }
 }

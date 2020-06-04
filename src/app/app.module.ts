@@ -9,23 +9,26 @@ import {HttpClientModule} from "@angular/common/http";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {PrimengModule} from "./primeng/primeng.module";
 import {MessageService} from "primeng/api";
-import {DropdownModule} from "primeng";
+import {DropdownModule, TabViewModule} from "primeng";
+import { InventoryManagementComponent } from './inventory-management/inventory-management.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    StudentComponent
+    StudentComponent,
+    InventoryManagementComponent
   ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    BrowserAnimationsModule,
-    HttpClientModule,
-    FormsModule,
-    ReactiveFormsModule,
-    PrimengModule,
-    DropdownModule
-  ],
+    imports: [
+        BrowserModule,
+        AppRoutingModule,
+        BrowserAnimationsModule,
+        HttpClientModule,
+        FormsModule,
+        ReactiveFormsModule,
+        PrimengModule,
+        DropdownModule,
+        TabViewModule
+    ],
   providers: [MessageService],
   bootstrap: [AppComponent]
 })

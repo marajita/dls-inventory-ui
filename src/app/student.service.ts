@@ -28,4 +28,8 @@ export class StudentService {
   async insertStudent(data: object) {
     return await this.http.post(this.baseUrl + '/api/v1/student-controller/insertStudent', data).toPromise();
   }
+
+  async deactivateStudent(data: object) {
+    return await this.http.post(this.baseUrl + '/api/v1/student-controller/deactivateStudent', data).toPromise();
+  }
 }
