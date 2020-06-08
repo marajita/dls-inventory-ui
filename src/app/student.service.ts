@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import {Injectable} from '@angular/core';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
 
 const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -31,5 +31,9 @@ export class StudentService {
 
   async deactivateStudent(data: object) {
     return await this.http.post(this.baseUrl + '/api/v1/student-controller/deactivateStudent', data).toPromise();
+  }
+
+  async assignInventory(data: object) {
+    return await this.http.post(this.baseUrl + '/api/v1/student-controller/assignInventory', data).toPromise();
   }
 }

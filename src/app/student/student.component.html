@@ -13,8 +13,8 @@
                     style="margin-right: 0.5em;"></button>
             <button type="button" pButton icon="pi pi-file-excel" iconPos="left" label="EXCEL" (click)="exportExcel()"
                     style="margin-right: 0.5em;" class="ui-button-success"></button>
-            <button type="button" pButton icon="pi pi-file-pdf" iconPos="left" label="PDF" (click)="exportPdf()"
-                    class="ui-button-warning" style="margin-right: 0.5em;"></button>
+            <!--            <button type="button" pButton icon="pi pi-file-pdf" iconPos="left" label="PDF" (click)="exportPdf()"-->
+            <!--                    class="ui-button-warning" style="margin-right: 0.5em;"></button>-->
             <!--        <button type="button" pButton icon="pi pi-file" iconPos="left" label="CSV - Selection Only" (click)="dt.exportCSV({selectionOnly:true})"></button>-->
           </div>
         </div>
@@ -129,7 +129,7 @@
   <button class="ui-button-danger" pButton type="submit" label="Delete" (click)="deleteStudent()"></button>
 </p-dialog>
 
-<p-dialog header="Inventory Management" [(visible)]="enableInventoryManagement">
+<p-dialog header="Inventory Management" [(visible)]="enableInventoryManagement" [style]="{width: '700px'}">
   <p-tabView>
     <p-tabPanel header="Notes/History" leftIcon="pi pi-user">
       <p-table [columns]="studentHistoryCols" [value]="studentHistoryList">
@@ -148,24 +148,74 @@
           </tr>
         </ng-template>
       </p-table>
-    </p-tabPanel>
       <form [formGroup]="studentHistoryForm" (ngSubmit)="updateStudentHistory()">
         <div class="ui-fluid">
           <div class="p-field">
-            <label for="comments" class="p-col-12 p-md-2">Net ID</label>
+            <label for="comments" class="p-col-12 p-md-2">Comments</label>
             <textarea id="comments" type="text" formControlName="comments" class="p-col-12 p-md-6" rows="5"
                       maxlength="200"></textarea>
           </div>
         </div>
       </form>
-    <p-tabPanel header="Assign Inventory" rightIcon="pi pi-inbox">
 
     </p-tabPanel>
-    <p-tabPanel header="Handle Repair" leftIcon="pi pi-user" rightIcon="pi pi-star">
+    <p-tabPanel header="Manage Inventory" rightIcon="pi pi-inbox">
+      <h3>Current Inventory</h3>
+      <div class="p-field">
+        <label for="laptopSn" class="p-col-12 p-md-4">Laptop SN</label>
+        <input disabled=true id="laptopSn" type="text" class="p-col-12 p-md-6"
+               value="{{assignedInventory['laptopSn']}}">
+      </div>
+      <div class="p-field">
+        <label for="powerAdapterSn" class="p-col-12 p-md-4">Power Adaptor SN</label>
+        <input disabled=true id="powerAdapterSn" type="text" class="p-col-12 p-md-6"
+               value="{{assignedInventory['powerAdapterSn']}}">
+      </div>
 
+      <div>
+        <div>
+          <p-button type="button" class="ui-button-raised" (onClick)="onInventoryAssignNewLaptopClicked()"
+                    label="Assign New Inventory"></p-button>
+          <span>&nbsp;</span>
+          <p-button type="button" class="ui-button-raised" (onClick)="onInventoryRepairClicked()"
+                    label="Repair Inventory"></p-button>
+        </div>
+        <div *ngIf="enableInventoryAssignment">
+          <form [formGroup]="inventoryAssignForm" (ngSubmit)="onInventoryAssignNewLaptopSaved()">
+            <h3>Assign Inventory</h3>
+            <div class="ui-fluid">
+              <div class="p-field">
+                <!--                <label for="comments" class="p-col-12 p-md-2">Inventory</label>-->
+                <p-dropdown [options]="spareInventoryList" formControlName="inventory" placeholder="Select Inventory"
+                            optionLabel="label" [showClear]="true" [filter]="true" required=true
+                            class="p-col-12 p-md-4"></p-dropdown>
+              </div>
+            </div>
+            <div class="p-field p-col-4">
+              <button pButton type="submit" label="Submit" [disabled]="!inventoryRepairForm.valid"></button>
+            </div>
+          </form>
+        </div>
+
+        <div *ngIf="enableInventoryRepair">
+          <form [formGroup]="inventoryRepairForm" (ngSubmit)="onInventoryRepairSaved()">
+            <h3>Repair Inventory</h3>
+            <div class="ui-fluid">
+              <div class="p-field">
+                <!--                <label for="comments" class="p-col-12 p-md-2">Inventory</label>-->
+                <textarea formControlName="comment" class="p-col-12 p-md-6" rows="6"
+                          placeholder="Enter comments"></textarea>
+              </div>
+            </div>
+            <div class="p-field p-col-4">
+              <button pButton type="submit" label="Submit" [disabled]="!inventoryRepairForm.valid"></button>
+            </div>
+          </form>
+        </div>
+      </div>
     </p-tabPanel>
   </p-tabView>
   <div class="p-field p-col-4">
-    <button pButton type="submit" label="Close" (click)="enableInventoryManagement = false"></button>
+    <button pButton type="submit" label="Close" (click)="onCloseAssignPopUpClicked()"></button>
   </div>
 </p-dialog>

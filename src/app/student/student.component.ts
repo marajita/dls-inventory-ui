@@ -3,6 +3,9 @@ import {StudentService} from "../student.service";
 import {MessageService, SelectItem} from 'primeng/api';
 import {FormControl, FormGroup, Validators} from "@angular/forms";
 
+import * as XLSX from "node_modules/xlsx/dist/xlsx.js";
+import {InventoryService} from "../inventory.service";
+
 
 @Component({
   selector: 'app-student',
@@ -12,10 +15,10 @@ import {FormControl, FormGroup, Validators} from "@angular/forms";
 })
 export class StudentComponent implements OnInit {
 
-  constructor(private studentService: StudentService, private messageService: MessageService) {
+  constructor(private studentService: StudentService, private inventoryService: InventoryService, private messageService: MessageService) {
   }
 
-  studentList: any;
+  studentList: any[];
   studentId: number;
   cols: any[];
   studentHistoryCols: any[];
@@ -28,6 +31,11 @@ export class StudentComponent implements OnInit {
   submitted = false;
   programYears: SelectItem[];
 
+  //Inventory
+  assignedInventory = {};
+  enableInventoryAssignment: boolean = false;
+
+  spareInventoryList: SelectItem[] = [];
 
   studentForm = new FormGroup({
     netId: new FormControl('', Validators.required),
@@ -42,9 +50,19 @@ export class StudentComponent implements OnInit {
 
   studentHistoryForm = new FormGroup({
     comments: new FormControl('')
-
   });
+
+  inventoryAssignForm = new FormGroup({
+    inventory: new FormControl('', Validators.required)
+  });
+
+  inventoryRepairForm = new FormGroup({
+    comment: new FormControl('', Validators.required)
+  });
+
   enableInventoryManagement: boolean = false;
+  enableInventoryRepair: boolean = false;
+
   studentHistoryList: any[] = [];
 
   get registerFormControl() {
@@ -61,7 +79,8 @@ export class StudentComponent implements OnInit {
       {field: 'dukeEmail', header: 'Duke Email'},
       {field: 'altEmail', header: 'Alt Email'},
       {field: 'programYear', header: 'Program Year'},
-      {field: 'dukeEmail', header: 'Duke Email'},
+      {field: '', header: 'Laptop SN'},
+
     ];
 
     this.programYears = [
@@ -91,8 +110,16 @@ export class StudentComponent implements OnInit {
       console.log(data);
     });
 
-    this.studentHistoryList.push({'netId':'bsha452', 'activityDate': '01-01-2020 13:34', 'comments': 'Student entry created'})
-    this.studentHistoryList.push({'netId':'bsha452', 'activityDate': '01-01-2020 14:34', 'comments': 'Laptop assigned - DSFSL23423'})
+    this.studentHistoryList.push({
+      'netId': 'bsha452',
+      'activityDate': '01-01-2020 13:34',
+      'comments': 'Student entry created'
+    })
+    this.studentHistoryList.push({
+      'netId': 'bsha452',
+      'activityDate': '01-01-2020 14:34',
+      'comments': 'Laptop assigned - DSFSL23423'
+    })
 
   }
 
@@ -127,16 +154,18 @@ export class StudentComponent implements OnInit {
     if (this.studentModalTitle == 'Add Student') {
       this.studentService.insertStudent(studentRecord).then(data => {
         console.log("inserted");
+        this.messageService.add({severity: 'success', summary: 'Success', detail: 'Student Added'});
         this.getAllStudents();
       }).catch(data => {
         console.log(data);
       });
+
     } else {
       studentRecord.studentId = this.studentId;
       this.studentService.updateStudent(studentRecord).then(data => {
         console.log("updated");
+        this.messageService.add({severity: 'success', summary: 'Success', detail: 'Student Updated'});
         this.getAllStudents();
-
       }).catch(data => {
         console.log(data);
       });
@@ -145,41 +174,71 @@ export class StudentComponent implements OnInit {
 
   }
 
-  exportPdf() {
-    alert("Work in progress...")
-    // import("jspdf").then(jsPDF => {
-    //   import("jspdf-autotable").then(x => {
-    //     const doc = new jsPDF.default(0,0);
-    //     doc.autoTable(this.exportColumns, this.cars);
-    //     doc.save('primengTable.pdf');
-    //   })
-    // })
-  }
+
+  // exportExcel() {
+  //   console.log(this.getStudentsExport());
+  //   import("node_modules/xlsx/dist/xlsx.js").then(xlsx => {
+  //     const worksheet = xlsx.utils.json_to_sheet([
+  //       { A:"S", B:"h", C:"e", D:"e", E:"t", F:"J", G:"S" },
+  //       { A: 1,  B: 2,  C: 3,  D: 4,  E: 5,  F: 6,  G: 7  },
+  //       { A: 2,  B: 3,  C: 4,  D: 5,  E: 6,  F: 7,  G: 8  }
+  //     ], {header:["A","B","C","D","E","F","G"]});
+  //     const workbook = {Sheets: {'data': worksheet}, SheetNames: ['data']};
+  //     const excelBuffer: any = xlsx.write(workbook, {bookType: 'xlsx', type: 'array'});
+  //     this.saveAsExcelFile(excelBuffer, "student");
+  //   });
+  // }
 
   exportExcel() {
-    alert("Work in progress...")
-    // import("xlsx").then(xlsx => {
-    //   const worksheet = xlsx.utils.json_to_sheet(this.getCars());
-    //   const workbook = { Sheets: { 'data': worksheet }, SheetNames: ['data'] };
-    //   const excelBuffer: any = xlsx.write(workbook, { bookType: 'xlsx', type: 'array' });
-    //   this.saveAsExcelFile(excelBuffer, "primengTable");
-    // });
+    const fileName = 'test.xlsx';
+
+    const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(this.getStudentsExport());
+    const wb: XLSX.WorkBook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'test');
+
+    XLSX.writeFile(wb, fileName);
   }
 
   saveAsExcelFile(buffer: any, fileName: string): void {
-    alert("Work in progress...")
-    // import("file-saver").then(FileSaver => {
-    //   let EXCEL_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
-    //   let EXCEL_EXTENSION = '.xlsx';
-    //   const data: Blob = new Blob([buffer], {
-    //     type: EXCEL_TYPE
-    //   });
-    //   FileSaver.saveAs(data, fileName + '_export_' + new Date().getTime() + EXCEL_EXTENSION);
-    // });
+    import("node_modules/file-saver/dist/FileSaver.js").then(FileSaver => {
+      let EXCEL_TYPE = 'application/vnd.ms-excel;charset=utf-8';
+      let EXCEL_EXTENSION = '.xlsx';
+      const data: Blob = new Blob([buffer], {
+        type: EXCEL_TYPE
+      });
+      FileSaver.saveAs(data, fileName + '_export_' + new Date().getTime() + EXCEL_EXTENSION);
+    });
+  }
+
+  getStudentsExport() {
+    let students = [];
+    for (let student of this.studentList) {
+      // student.netId = student.netId.toString();
+      // student.firstName = student.firstName.toString();
+      // student.lastName = student.lastName.toString();
+      // student.preferredName = student.preferredName.toString();
+      // student.dukeEmail = student.dukeEmail.toString();
+      // student.altEmail = student.altEmail.toString();
+      // student.programYear = student.programYear.toString();
+      let std = {
+        netId: student.netId.toString(),
+        firstName: student.firstName.toString(),
+        lastName: student.lastName.toString(),
+        preferredName: student.preferredName.toString(),
+        dukeEmail: student.dukeEmail.toString(),
+        altEmail: student.altEmail.toString(),
+        programYear: student.programYear.toString()
+      }
+      students.push(std);
+    }
+    return students;
   }
 
 
   onAssignInventoryClicked(rowData) {
+    console.log(rowData.inventory);
+    this.studentId = rowData.studentId;
+    this.assignedInventory = rowData.inventory;
     this.enableInventoryManagement = true;
   }
 
@@ -196,6 +255,8 @@ export class StudentComponent implements OnInit {
       console.log("updated");
       this.getAllStudents();
       this.enableStudentDeletePopup = false;
+      this.messageService.add({severity: 'success', summary: 'Success', detail: 'Student Deleted'});
+
     }).catch(data => {
       console.log(data);
     });
@@ -203,5 +264,63 @@ export class StudentComponent implements OnInit {
 
   updateStudentHistory() {
 
+  }
+
+
+  onInventoryAssignNewLaptopClicked() {
+    this.enableInventoryRepair = false;
+    //get spare inventory list
+    this.inventoryService.getAllSpareInventories().then(data => {
+      console.log(data["inventoryList"]);
+      const spareInvList = data["inventoryList"];
+      this.spareInventoryList = [];
+
+      for (let inv of spareInvList) {
+        inv.label = inv.laptopSn;
+        inv.value = inv;
+        this.spareInventoryList.push(inv);
+      }
+      console.log(this.spareInventoryList);
+      this.enableInventoryAssignment = true;
+
+    }).catch(error => {
+      console.log(error)
+    });
+  }
+
+
+  onInventoryAssignNewLaptopSaved() {
+    const inventoryRecord = Object.assign({}, this.inventoryAssignForm.value);
+    console.log(inventoryRecord);
+    const input = {
+      studentId: this.studentId,
+      inventoryId: inventoryRecord.inventory.inventoryId
+    }
+    this.assignInventory(input);
+    this.messageService.add({severity: 'success', summary: 'Success', detail: 'Laptop Assigned'});
+
+  }
+
+  onCloseAssignPopUpClicked() {
+    this.getAllStudents();
+    this.enableInventoryManagement = false;
+
+  }
+
+  assignInventory(data) {
+    this.studentService.assignInventory(data).then(r => {
+      console.log(r)
+    });
+  }
+
+  onInventoryRepairClicked() {
+    this.enableInventoryRepair = true;
+    this.enableInventoryAssignment = false;
+
+  }
+
+  onInventoryRepairSaved() {
+    const inventoryRecord = Object.assign({}, this.inventoryRepairForm.value);
+    console.log(inventoryRecord);
   }
 }

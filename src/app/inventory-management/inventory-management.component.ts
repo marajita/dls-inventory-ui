@@ -1,7 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {MessageService, SelectItem} from "primeng/api";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
-import {StudentService} from "../student.service";
 import {InventoryService} from "../inventory.service";
 
 @Component({
@@ -13,108 +12,128 @@ export class InventoryManagementComponent implements OnInit {
 
   constructor(private inventoryService: InventoryService, private messageService: MessageService) {
   }
-  studentList: any;
-  id: number;
+
+  inventoryList: any;
+  inventoryId: number;
   cols: any[];
-  enableStudentPopup: boolean = false;
-  studentModalTitle: string = "Loading..";
+  enableInventoryPopup: boolean = false;
+  showStatusDropdown: boolean = false;
+  inventoryModalTitle: string = "Loading..";
 
   submitted = false;
-  programYears: SelectItem[];
+  statusList: SelectItem[]; // pop up dropdown
+  statusListFilter: SelectItem[]; // table filter dropdown
+  enableInventoryManagement: boolean = false;
+  enableInventoryDeletePopup: boolean = false;
 
-
-  studentForm = new FormGroup({
-    netId: new FormControl('', Validators.required),
-    firstName: new FormControl('', Validators.required),
-    lastName: new FormControl('', Validators.required),
-    dukeEmail: new FormControl('',[Validators.required, Validators.pattern('^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$')]),
-    altEmail: new FormControl(''),
-    programYear: new FormControl('', Validators.required),
-    preferredName: new FormControl(''),
-
+  inventoryForm = new FormGroup({
+    laptopSn: new FormControl('', Validators.required),
+    powerAdapterSn: new FormControl('', Validators.required),
+    status: new FormControl('SPARE')
   });
 
   get registerFormControl() {
-    return this.studentForm.controls;
+    return this.inventoryForm.controls;
   }
 
   ngOnInit(): void {
-    this.getAllStudents();
+    this.getAllInventories();
     this.cols = [
-      {field: 'netId', header: 'Net ID'},
-      {field: 'firstName', header: 'First Name'},
-      {field: 'lastName', header: 'Last Name'},
-      {field: 'preferredName', header: 'Preferred Name'},
-      {field: 'dukeEmail', header: 'Duke Email'},
-      {field: 'altEmail', header: 'Alt Email'},
-      {field: 'programYear', header: 'Program Year'}
+      {field: 'laptopSn', header: 'Laptop SN'},
+      {field: 'powerAdapterSn', header: 'Power Adapter SN'},
+      {field: 'status', header: 'Status'}
     ];
 
-    this.programYears = [
-      { label: 'All', value: null },
-      { label: 'W2019', value: 'W2019' },
-      { label: 'G2019', value: 'G2019' },
-      { label: 'W2020', value: 'W2020' },
-      { label: 'G2020', value: 'G2020' },
+    this.statusList = [
+      {label: 'SPARE', value: 'SPARE'},
+      {label: 'IN_USE', value: 'IN_USE'},
+      {label: 'IN_REPAIR', value: 'IN_REPAIR'},
+    ];
+
+    this.statusListFilter = [
+      {label: 'All', value: null},
+      {label: 'SPARE', value: 'SPARE'},
+      {label: 'IN_USE', value: 'IN_USE'},
+      {label: 'IN_REPAIR', value: 'IN_REPAIR'},
     ];
 
   }
 
-  private getAllStudents() {
-    // this.studentService.getAllStudents().then((data: Array<any>) => {
-    //   this.studentList = data["studentList"];
-    //   console.log(this.studentList)
-    // }).catch(data => {
-    //   console.log(data);
-    // });
-  }
-
-  onEditStudentClicked(rowData) {
-    this.studentModalTitle = "Edit Student"
-    console.log(rowData);
-    console.log(rowData.firstName);
-    this.id = rowData.id;
-    this.studentForm.patchValue({
-      netId: rowData.netId,
-      firstName: rowData.firstName,
-      lastName: rowData.lastName,
-      dukeEmail: rowData.dukeEmail,
-      altEmail: rowData.altEmail,
-      programYear: rowData.programYear,
-      preferredName:rowData.preferredName,
+  private getAllInventories() {
+    this.inventoryService.getAllInventories().then((data: Array<any>) => {
+      this.inventoryList = data["inventoryList"];
+      console.log(this.inventoryList)
+    }).catch(data => {
+      console.log(data);
     });
-    this.enableStudentPopup = true;
   }
 
-  onAddStudentClicked() {
-    this.studentForm.reset();
+  onEditInventoryClicked(rowData) {
+    this.inventoryModalTitle = "Edit Inventory"
+    this.showStatusDropdown = true;
+    console.log(rowData);
+    this.inventoryId = rowData.inventoryId;
+    const status = {label: rowData.status, value: rowData.status}
+    this.inventoryForm.patchValue({
+      laptopSn: rowData.laptopSn,
+      powerAdapterSn: rowData.powerAdapterSn,
+      status: status
+    });
+    this.enableInventoryPopup = true;
+  }
+
+  onAddInventoryClicked() {
+    this.showStatusDropdown = false;
+    this.inventoryForm.reset();
     this.submitted = false;
-    this.studentModalTitle = 'Add Student';
-    this.enableStudentPopup = true;
+    this.inventoryModalTitle = 'Add Inventory';
+    this.enableInventoryPopup = true;
   }
 
-  addOrEditStudent() {
-    // console.log(this.studentForm.value);
-    // this.submitted = true;
-    // const studentRecord = Object.assign({}, this.studentForm.value);
-    // if (this.studentModalTitle == 'Add Student') {
-    //   this.studentService.insertStudent(studentRecord).then(data => {
-    //     console.log("inserted");
-    //     this.getAllStudents();
-    //   }).catch(data => {
-    //     console.log(data);
-    //   });
-    // } else {
-    //   studentRecord.id = this.id;
-    //   this.studentService.updateStudent(studentRecord).then(data => {
-    //     console.log("updated");
-    //     this.getAllStudents();
-    //
-    //   }).catch(data => {
-    //     console.log(data);
-    //   });
-    // }
-    // this.enableStudentPopup = false;
+  addOrEditInventory() {
+    console.log(this.inventoryForm.value);
+    this.submitted = true;
+    const inventoryRecord = Object.assign({}, this.inventoryForm.value);
+    if (this.inventoryModalTitle == 'Add Inventory') {
+      this.inventoryService.insertInventory(inventoryRecord).then(data => {
+        console.log("inserted");
+        this.getAllInventories();
+      }).catch(data => {
+        console.log(data);
+      });
+    } else {
+      inventoryRecord.id = this.inventoryId;
+      this.inventoryService.updateInventory(inventoryRecord).then(data => {
+        console.log("updated");
+        this.getAllInventories();
 
+      }).catch(data => {
+        console.log(data);
+      });
+    }
+    this.enableInventoryPopup = false;
+
+  }
+
+  onAssignInventoryClicked(rowData) {
+    this.enableInventoryManagement = true;
+  }
+
+  onDeleteInventoryClicked(rowData) {
+    this.inventoryId = rowData.inventoryId;
+    this.enableInventoryDeletePopup = true
+  }
+
+  deleteInventory() {
+    const inventoryRecord = {
+      inventoryId: this.inventoryId,
+    };
+    this.inventoryService.deactivateInventory(inventoryRecord).then(data => {
+      console.log("updated");
+      this.getAllInventories();
+      this.enableInventoryDeletePopup = false;
+    }).catch(data => {
+      console.log(data);
+    });
   }
 }

@@ -1,10 +1,10 @@
 <div style="padding: 10px">
-  <p-button type="button" class="ui-button-raised" icon="pi pi-user-plus" iconPos="left" label="Add Student"
-            (click)="onAddStudentClicked()"></p-button>
+  <p-button type="button" class="ui-button-raised" icon="pi pi-user-plus" iconPos="left" label="Add Inventory"
+            (click)="onAddInventoryClicked()"></p-button>
 </div>
 <div>
-  <p-table #dt [columns]="cols" [value]="studentList" [paginator]="true" [rows]="10"
-           [rowsPerPageOptions]="[5,10,20,50,100]" [responsive]="true" sortField="netId">
+  <p-table #dt [columns]="cols" [value]="inventoryList" [paginator]="true" [rows]="10"
+           [rowsPerPageOptions]="[5,10,20,50,100]" [responsive]="true" sortField="laptopSn">
     <ng-template pTemplate="caption">
       <div class="p-grid">
         <div class="p-col-8">
@@ -33,19 +33,11 @@
       </tr>
       <tr>
         <th *ngFor="let col of columns" [ngSwitch]="col.field">
-          <input *ngSwitchCase="'netId'" pInputText type="text"
+          <input *ngSwitchCase="'laptopSn'" pInputText type="text"
                  (input)="dt.filter($event.target.value, col.field, 'contains')">
-          <input *ngSwitchCase="'firstName'" pInputText type="text"
+          <input *ngSwitchCase="'powerAdapterSn'" pInputText type="text"
                  (input)="dt.filter($event.target.value, col.field, 'contains')">
-          <input *ngSwitchCase="'lastName'" pInputText type="text"
-                 (input)="dt.filter($event.target.value, col.field, 'contains')">
-          <input *ngSwitchCase="'preferredName'" pInputText type="text"
-                 (input)="dt.filter($event.target.value, col.field, 'contains')">
-          <input *ngSwitchCase="'dukeEmail'" pInputText type="text"
-                 (input)="dt.filter($event.target.value, col.field, 'contains')">
-          <input *ngSwitchCase="'altEmail'" pInputText type="text"
-                 (input)="dt.filter($event.target.value, col.field, 'contains')">
-          <p-dropdown *ngSwitchCase="'programYear'" [options]="programYears" [style]="{'width':'100%'}"
+          <p-dropdown *ngSwitchCase="'status'" [options]="statusListFilter" [style]="{'width':'100%'}"
                       (onChange)="dt.filter($event.value, col.field, 'equals')"></p-dropdown>
         </th>
       </tr>
@@ -55,61 +47,51 @@
         <td class="cell-breakWord" *ngFor="let col of cols">
           {{rowData[col.field]}}
         </td>
-        <td class="cell-max-width-4px">
-          <button pButton icon="pi pi-user-edit" (click)="onEditStudentClicked(rowData)"></button>
+        <td class="cell-max-width-4px p-col-2">
+          <button pButton icon="pi pi-times" class="ui-button-danger" (click)="onDeleteInventoryClicked(rowData)"
+                  style="margin-left: 0.5em;"></button>
+          <button pButton icon="pi pi-user-edit" (click)="onEditInventoryClicked(rowData)"
+                  style="margin-left: 0.5em;"></button>
+          <button pButton label="Assign" (click)="onAssignInventoryClicked(rowData)"
+                  style="margin-left: 0.5em;"></button>
         </td>
       </tr>
     </ng-template>
   </p-table>
 </div>
 
-<!--<p-dialog header="{{studentModalTitle}}" [(visible)]="enableStudentPopup" [style]="{width: '650px'}">-->
-<!--  <form [formGroup]="studentForm" (ngSubmit)="addOrEditStudent()">-->
-<!--    <div class="ui-fluid">-->
-<!--      <div class="p-field">-->
-<!--        <label for="netId" class="p-col-12 p-md-2">Net ID <span style="color: red">*</span></label>-->
-<!--        <input id="netId" type="text" formControlName="netId" class="p-col-12 p-md-6">-->
-<!--        <span class="p-col-12 p-md-4" style="color: red"-->
-<!--              *ngIf="(registerFormControl.netId.touched || submitted) && registerFormControl.netId.errors?.required"> Value is required </span>-->
-<!--      </div>-->
-<!--      <div class="p-field">-->
-<!--        <label for="firstName" class="p-col-12 p-md-2">First Name<span style="color: red">*</span></label>-->
-<!--        <input id="firstName" type="text" formControlName="firstName" class="p-col-12 p-md-6">-->
-<!--        <span style="color: red"-->
-<!--              *ngIf="(registerFormControl.firstName.touched || submitted) && registerFormControl.firstName.errors?.required"> Value is required </span>-->
-<!--      </div>-->
-<!--      <div class="p-field">-->
-<!--        <label for="lastName" class="p-col-12 p-md-2">Last Name<span style="color: red">*</span></label>-->
-<!--        <input id="lastName" type="text" formControlName="lastName" class="p-col-12 p-md-6">-->
-<!--        <span style="color: red"-->
-<!--              *ngIf="(registerFormControl.lastName.touched || submitted) && registerFormControl.lastName.errors?.required"> Value is required </span>-->
-<!--      </div>-->
-<!--      <div class="p-field">-->
-<!--        <label for="preferredName" class="p-col-12 p-md-2">Preferred Name</label>-->
-<!--        <input id="preferredName" type="text" formControlName="preferredName" class="p-col-12 p-md-6">-->
-<!--      </div>-->
-<!--      <div class="p-field">-->
-<!--        <label for="dukeEmail" class="p-col-12 p-md-2">Duke Email<span style="color: red">*</span></label>-->
-<!--        <input id="dukeEmail" type="text" formControlName="dukeEmail" class="p-col-12 p-md-6">-->
-<!--        <span style="color: red"-->
-<!--              *ngIf="(registerFormControl.dukeEmail.touched || submitted) && registerFormControl.dukeEmail.errors?.required"> Value is required </span>-->
-<!--      </div>-->
-<!--      <div class="p-field">-->
-<!--        <label for="altEmail" class="p-col-12 p-md-2">Alt Email</label>-->
-<!--        <input id="altEmail" type="text" formControlName="altEmail" class="p-col-12 p-md-6">-->
-<!--      </div>-->
-<!--      <div class="p-field">-->
-<!--        <label for="programYear" class="p-col-12 p-md-2">Program Year<span style="color: red">*</span></label>-->
-<!--        <input id="programYear" type="text" formControlName="programYear" class="p-col-12 p-md-6">-->
-<!--        <span style="color: red"-->
-<!--              *ngIf="(registerFormControl.programYear.touched || submitted) && registerFormControl.programYear.errors?.required"> Value is required </span>-->
-<!--      </div>-->
-<!--      <div class="p-field p-col-4">-->
-<!--        <button pButton type="submit" label="Submit" [disabled]="!studentForm.valid"></button>-->
-<!--      </div>-->
+<p-dialog header="{{inventoryModalTitle}}" [(visible)]="enableInventoryPopup" [style]="{width: '650px'}">
+  <form [formGroup]="inventoryForm" (ngSubmit)="addOrEditInventory()">
+    <div class="ui-fluid">
+      <div class="p-field">
+        <label for="laptopSn" class="p-col-12 p-md-2">Laptop SN <span style="color: red">*</span></label>
+        <input id="laptopSn" type="text" formControlName="laptopSn" class="p-col-12 p-md-6">
+        <span class="p-col-12 p-md-4" style="color: red"
+              *ngIf="(registerFormControl.laptopSn.touched || submitted) && registerFormControl.laptopSn.errors?.required"> Value is required </span>
+      </div>
+      <div class="p-field">
+        <label for="powerAdapterSn" class="p-col-12 p-md-2">Power Adapter SN<span style="color: red">*</span></label>
+        <input id="powerAdapterSn" type="text" formControlName="powerAdapterSn" class="p-col-12 p-md-6">
+        <span style="color: red"
+              *ngIf="(registerFormControl.powerAdapterSn.touched || submitted) && registerFormControl.powerAdapterSn.errors?.required"> Value is required </span>
+      </div>
+      <div class="p-field" *ngIf="showStatusDropdown">
+        <label class="p-col-12 p-md-2">Status<span style="color: red">*</span></label>
+        <p-dropdown [options]="statusList" formControlName="status" placeholder="Select Status" optionLabel="label" [showClear]="true" class="p-col-12 p-md-6"></p-dropdown>
+        <span style="color: red"
+              *ngIf="(registerFormControl.status.touched || submitted) && registerFormControl.status.errors?.required"> Value is required </span>
+      </div>
+      <div class="p-field p-col-4">
+        <button pButton type="submit" label="Submit" [disabled]="!inventoryForm.valid"></button>
+      </div>
 
-<!--    </div>-->
+    </div>
 
-<!--  </form>-->
+  </form>
 
-<!--</p-dialog>-->
+</p-dialog>
+
+<p-dialog header="Delete Confirmation" [(visible)]="enableInventoryDeletePopup" [style]="{width: '300px'}">
+  <span><p>Are you sure?</p></span>
+  <button class="ui-button-danger" pButton type="submit" label="Delete" (click)="deleteInventory()"></button>
+</p-dialog>
