@@ -153,7 +153,10 @@
           <div class="p-field">
             <label for="comments" class="p-col-12 p-md-2">Comments</label>
             <textarea id="comments" type="text" formControlName="comments" class="p-col-12 p-md-6" rows="5"
-                      maxlength="200"></textarea>
+                      maxlength="200" required="true"></textarea>
+          </div>
+          <div class="p-field p-col-4">
+            <button pButton type="submit" label="Submit" [disabled]="!studentHistoryForm.valid"></button>
           </div>
         </div>
       </form>
@@ -192,18 +195,19 @@
               </div>
             </div>
             <div class="p-field p-col-4">
-              <button pButton type="submit" label="Submit" [disabled]="!inventoryRepairForm.valid"></button>
+              <button pButton type="submit" label="Submit" [disabled]="!inventoryAssignForm.valid"></button>
             </div>
           </form>
         </div>
 
         <div *ngIf="enableInventoryRepair">
+          <div class="p-field p-col-4"></div>
           <form [formGroup]="inventoryRepairForm" (ngSubmit)="onInventoryRepairSaved()">
             <h3>Repair Inventory</h3>
             <div class="ui-fluid">
               <div class="p-field">
                 <!--                <label for="comments" class="p-col-12 p-md-2">Inventory</label>-->
-                <textarea formControlName="comment" class="p-col-12 p-md-6" rows="6"
+                <textarea formControlName="comments" class="p-col-12 p-md-6" rows="6"
                           placeholder="Enter comments"></textarea>
               </div>
             </div>

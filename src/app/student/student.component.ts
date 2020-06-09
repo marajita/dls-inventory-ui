@@ -57,7 +57,7 @@ export class StudentComponent implements OnInit {
   });
 
   inventoryRepairForm = new FormGroup({
-    comment: new FormControl('', Validators.required)
+    comments: new FormControl('', Validators.required)
   });
 
   enableInventoryManagement: boolean = false;
@@ -263,7 +263,13 @@ export class StudentComponent implements OnInit {
   }
 
   updateStudentHistory() {
-
+    const studentRecord = Object.assign({}, this.studentHistoryForm.value);
+    studentRecord.studentId = this.studentId
+      this.studentService.updateStudentHistory(studentRecord).then(data => {
+        this.messageService.add({severity: 'success', summary: 'Success', detail: 'Student Notes added'});
+      }).catch(data => {
+        console.log(data);
+      });
   }
 
 
@@ -321,6 +327,36 @@ export class StudentComponent implements OnInit {
 
   onInventoryRepairSaved() {
     const inventoryRecord = Object.assign({}, this.inventoryRepairForm.value);
+    console.log(this.assignedInventory);
+    inventoryRecord.inventoryId = this.assignedInventory['inventoryId'];
+    inventoryRecord.status = 'IN_REPAIR';
     console.log(inventoryRecord);
+
+    this.inventoryService.repairInventory(inventoryRecord).then(data => {
+      this.messageService.add({severity: 'success', summary: 'Success', detail: 'Inventory Updated'});
+    }).catch(data => {
+      console.log(data);
+    });
+
+    // this.inventoryService.isInventoryInUse(inventoryRecord).then(data => {
+    //   console.log(data)
+    //   if (data === false) {
+    //     this.inventoryService.repairInventory(inventoryRecord).then(data => {
+    //       this.messageService.add({severity: 'success', summary: 'Success', detail: 'Inventory Updated'});
+    //     }).catch(data => {
+    //       console.log(data);
+    //     });
+    //   } else {
+    //     this.messageService.add({
+    //       severity: 'error',
+    //       summary: 'Success',
+    //       detail: 'Inventory in use. Please un-assign and try again'
+    //     });
+    //   }
+    // }).catch(data => {
+    //   console.log(data);
+    // });
+
+
   }
 }

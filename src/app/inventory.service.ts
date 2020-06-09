@@ -33,4 +33,12 @@ export class InventoryService {
   async deactivateInventory(data: object) {
     return await this.http.post(this.baseUrl + '/api/v1/inventory-controller/deactivateInventory', data).toPromise();
   }
+
+  async repairInventory(data: object) {
+    return await this.http.post(this.baseUrl + '/api/v1/inventory-controller/repairInventory', data).toPromise();
+  }
+
+  async isInventoryInUse(data: object) {
+    return await this.http.post(this.baseUrl + '/api/v1/inventory-controller/isInventoryInUse', data).toPromise();
+  }
 }

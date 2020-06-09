@@ -36,4 +36,8 @@ export class StudentService {
   async assignInventory(data: object) {
     return await this.http.post(this.baseUrl + '/api/v1/student-controller/assignInventory', data).toPromise();
   }
+
+  async updateStudentHistory(data: object) {
+    return await this.http.post(this.baseUrl + '/api/v1/student-controller/updateStudentHistory', data).toPromise();
+  }
 }
