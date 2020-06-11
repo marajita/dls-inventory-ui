@@ -34,6 +34,10 @@ export class StudentComponent implements OnInit {
   //Inventory
   assignedInventory = {};
   enableInventoryAssignment: boolean = false;
+  enableInventoryManagement: boolean = false;
+  enableInventoryRepair: boolean = false;
+
+  studentHistoryList: any[] = [];
 
   spareInventoryList: SelectItem[] = [];
 
@@ -60,10 +64,6 @@ export class StudentComponent implements OnInit {
     comments: new FormControl('', Validators.required)
   });
 
-  enableInventoryManagement: boolean = false;
-  enableInventoryRepair: boolean = false;
-
-  studentHistoryList: any[] = [];
 
   get registerFormControl() {
     return this.studentForm.controls;
@@ -79,7 +79,7 @@ export class StudentComponent implements OnInit {
       {field: 'dukeEmail', header: 'Duke Email'},
       {field: 'altEmail', header: 'Alt Email'},
       {field: 'programYear', header: 'Program Year'},
-      {field: '', header: 'Laptop SN'},
+      {field: 'laptopSn', header: 'Laptop SN'},
 
     ];
 
@@ -92,8 +92,8 @@ export class StudentComponent implements OnInit {
     ];
 
     this.studentHistoryCols = [
-      {field: 'netId', header: 'Net ID'},
-      {field: 'activityDate', header: 'Activity Date'},
+      // {field: 'netId', header: 'Net ID'},
+      {field: 'createdDate', header: 'Activity Date'},
       {field: 'comments', header: 'Comments'},
 
     ];
@@ -103,24 +103,10 @@ export class StudentComponent implements OnInit {
   private getAllStudents() {
     this.studentService.getAllStudents().then((data: Array<any>) => {
       this.studentList = data["studentList"];
-      // this.studentList = this.studentList.slice(); //Triggers data refresh
-
       console.log(this.studentList)
     }).catch(data => {
       console.log(data);
     });
-
-    this.studentHistoryList.push({
-      'netId': 'bsha452',
-      'activityDate': '01-01-2020 13:34',
-      'comments': 'Student entry created'
-    })
-    this.studentHistoryList.push({
-      'netId': 'bsha452',
-      'activityDate': '01-01-2020 14:34',
-      'comments': 'Laptop assigned - DSFSL23423'
-    })
-
   }
 
   onEditStudentClicked(rowData) {
@@ -239,7 +225,20 @@ export class StudentComponent implements OnInit {
     console.log(rowData.inventory);
     this.studentId = rowData.studentId;
     this.assignedInventory = rowData.inventory;
+    if (this.assignedInventory == null) {
+      this.assignedInventory = {laptopSn: '', powerAdapterSn: ''};
+    }
     this.enableInventoryManagement = true;
+    this.getStudentHistory();
+  }
+
+  private getStudentHistory() {
+    this.studentService.getAllStudentHistory(this.studentId).then(data => {
+      this.studentHistoryList = data["studentHistoryList"];
+      console.log(this.studentHistoryList);
+    }).catch(data => {
+      console.log(data);
+    });
   }
 
   onDeleteStudentClicked(rowData) {
@@ -265,11 +264,13 @@ export class StudentComponent implements OnInit {
   updateStudentHistory() {
     const studentRecord = Object.assign({}, this.studentHistoryForm.value);
     studentRecord.studentId = this.studentId
-      this.studentService.updateStudentHistory(studentRecord).then(data => {
-        this.messageService.add({severity: 'success', summary: 'Success', detail: 'Student Notes added'});
-      }).catch(data => {
-        console.log(data);
-      });
+    this.studentService.updateStudentHistory(studentRecord).then(data => {
+      this.messageService.add({severity: 'success', summary: 'Success', detail: 'Student Notes added'});
+      this.getStudentHistory();
+      this.studentHistoryForm.reset();
+    }).catch(data => {
+      console.log(data);
+    });
   }
 
 
@@ -337,26 +338,5 @@ export class StudentComponent implements OnInit {
     }).catch(data => {
       console.log(data);
     });
-
-    // this.inventoryService.isInventoryInUse(inventoryRecord).then(data => {
-    //   console.log(data)
-    //   if (data === false) {
-    //     this.inventoryService.repairInventory(inventoryRecord).then(data => {
-    //       this.messageService.add({severity: 'success', summary: 'Success', detail: 'Inventory Updated'});
-    //     }).catch(data => {
-    //       console.log(data);
-    //     });
-    //   } else {
-    //     this.messageService.add({
-    //       severity: 'error',
-    //       summary: 'Success',
-    //       detail: 'Inventory in use. Please un-assign and try again'
-    //     });
-    //   }
-    // }).catch(data => {
-    //   console.log(data);
-    // });
-
-
   }
 }

@@ -16,21 +16,47 @@ export class InventoryManagementComponent implements OnInit {
   inventoryList: any;
   inventoryId: number;
   cols: any[];
+  inventoryHistoryCols: any[];
+
   enableInventoryPopup: boolean = false;
+  enableInventoryDeletePopup: boolean = false;
   showStatusDropdown: boolean = false;
+
   inventoryModalTitle: string = "Loading..";
 
   submitted = false;
   statusList: SelectItem[]; // pop up dropdown
   statusListFilter: SelectItem[]; // table filter dropdown
+
+  //Student
+  assignedStudent = {};
+  enableInventoryAssignment: boolean = false;
   enableInventoryManagement: boolean = false;
-  enableInventoryDeletePopup: boolean = false;
+  enableInventoryRepair: boolean = false;
+
+  inventoryHistoryList: any[] = [];
+
+  studentList: SelectItem[] = [];
 
   inventoryForm = new FormGroup({
     laptopSn: new FormControl('', Validators.required),
     powerAdapterSn: new FormControl('', Validators.required),
-    status: new FormControl('SPARE')
+    statusSelect: new FormControl('SPARE')
   });
+
+  inventoryHistoryForm = new FormGroup({
+    comments: new FormControl('')
+  });
+
+  inventoryAssignForm = new FormGroup({
+    inventory: new FormControl('', Validators.required)
+  });
+
+  inventoryRepairForm = new FormGroup({
+    comments: new FormControl('', Validators.required)
+  });
+
+
 
   get registerFormControl() {
     return this.inventoryForm.controls;
@@ -73,11 +99,11 @@ export class InventoryManagementComponent implements OnInit {
     this.showStatusDropdown = true;
     console.log(rowData);
     this.inventoryId = rowData.inventoryId;
-    const status = {label: rowData.status, value: rowData.status}
+    const statusSelect = {label: rowData.status, value: rowData.status}
     this.inventoryForm.patchValue({
       laptopSn: rowData.laptopSn,
       powerAdapterSn: rowData.powerAdapterSn,
-      status: status
+      statusSelect: statusSelect
     });
     this.enableInventoryPopup = true;
   }
@@ -94,6 +120,7 @@ export class InventoryManagementComponent implements OnInit {
     console.log(this.inventoryForm.value);
     this.submitted = true;
     const inventoryRecord = Object.assign({}, this.inventoryForm.value);
+    console.log(inventoryRecord);
     if (this.inventoryModalTitle == 'Add Inventory') {
       this.inventoryService.insertInventory(inventoryRecord).then(data => {
         console.log("inserted");
@@ -102,7 +129,9 @@ export class InventoryManagementComponent implements OnInit {
         console.log(data);
       });
     } else {
-      inventoryRecord.id = this.inventoryId;
+      inventoryRecord.status = inventoryRecord.statusSelect.value;
+      inventoryRecord.inventoryId = this.inventoryId;
+      console.log(inventoryRecord);
       this.inventoryService.updateInventory(inventoryRecord).then(data => {
         console.log("updated");
         this.getAllInventories();
@@ -116,7 +145,23 @@ export class InventoryManagementComponent implements OnInit {
   }
 
   onAssignInventoryClicked(rowData) {
+    console.log(rowData.inventory);
+    this.inventoryId = rowData.inventoryId;
+    this.assignedStudent = rowData.inventory;
+    if(this.assignedStudent == null){
+      this.assignedStudent = {netId: '', lastname: '', firstname:'', email:''};
+    }
     this.enableInventoryManagement = true;
+    this.getInventoryHistory();
+  }
+
+  private getInventoryHistory() {
+    this.inventoryService.getAllInventoryHistory(this.inventoryId).then(data => {
+      this.inventoryHistoryList = data["inventoryHistoryList"];
+      console.log(this.inventoryHistoryList);
+    }).catch(data => {
+      console.log(data);
+    });
   }
 
   onDeleteInventoryClicked(rowData) {
@@ -132,6 +177,85 @@ export class InventoryManagementComponent implements OnInit {
       console.log("updated");
       this.getAllInventories();
       this.enableInventoryDeletePopup = false;
+    }).catch(data => {
+      console.log(data);
+    });
+  }
+
+  updateInventoryHistory() {
+    const inventoryRecord = Object.assign({}, this.inventoryHistoryForm.value);
+    inventoryRecord.inventoryId = this.inventoryId
+    this.inventoryService.updateInventoryHistory(inventoryRecord).then(data => {
+      this.messageService.add({severity: 'success', summary: 'Success', detail: 'Inventory Notes added'});
+      this.getInventoryHistory();
+      this.inventoryHistoryForm.reset();
+    }).catch(data => {
+      console.log(data);
+    });
+  }
+
+
+  onInventoryAssignNewLaptopClicked() {
+    this.enableInventoryRepair = false;
+    //get spare inventory list
+    this.inventoryService.getAllSpareInventories().then(data => {
+      console.log(data["inventoryList"]);
+      const spareInvList = data["inventoryList"];
+      this.studentList = [];
+
+      for (let inv of spareInvList) {
+        inv.label = inv.laptopSn;
+        inv.value = inv;
+        this.studentList.push(inv);
+      }
+      console.log(this.studentList);
+      this.enableInventoryAssignment = true;
+
+    }).catch(error => {
+      console.log(error)
+    });
+  }
+
+
+  onInventoryAssignNewLaptopSaved() {
+    const inventoryRecord = Object.assign({}, this.inventoryAssignForm.value);
+    console.log(inventoryRecord);
+    const input = {
+      inventoryId: this.inventoryId,
+      // inventoryId: inventoryRecord.inventory.inventoryId
+    }
+    this.assignInventory(input);
+    this.messageService.add({severity: 'success', summary: 'Success', detail: 'Laptop Assigned'});
+
+  }
+
+  onCloseAssignPopUpClicked() {
+    this.getAllInventories();
+    this.enableInventoryManagement = false;
+
+  }
+
+  assignInventory(data) {
+    this.inventoryService.assignInventory(data).then(r => {
+      console.log(r)
+    });
+  }
+
+  onInventoryRepairClicked() {
+    this.enableInventoryRepair = true;
+    this.enableInventoryAssignment = false;
+
+  }
+
+  onInventoryRepairSaved() {
+    const inventoryRecord = Object.assign({}, this.inventoryRepairForm.value);
+    console.log(this.assignedStudent);
+    inventoryRecord.inventoryId = this.assignedStudent['studentId'];
+    inventoryRecord.status = 'IN_REPAIR';
+    console.log(inventoryRecord);
+
+    this.inventoryService.repairInventory(inventoryRecord).then(data => {
+      this.messageService.add({severity: 'success', summary: 'Success', detail: 'Inventory Updated'});
     }).catch(data => {
       console.log(data);
     });

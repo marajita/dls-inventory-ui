@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 
 const httpOptions = {
-  headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+  headers: new HttpHeaders({'Content-Type': 'application/json'})
 };
 
 @Injectable({
@@ -12,12 +12,12 @@ export class StudentService {
 
   private baseUrl = 'http://localhost:8080';
 
-  constructor(private http:HttpClient) {
+  constructor(private http: HttpClient) {
 
   }
 
   async getAllStudents() {
-    const studentData = await this.http.get(this.baseUrl+'/api/v1/student-controller/getAllStudents').toPromise();
+    const studentData = await this.http.get(this.baseUrl + '/api/v1/student-controller/getAllStudents').toPromise();
     return studentData;
   }
 
@@ -39,5 +39,9 @@ export class StudentService {
 
   async updateStudentHistory(data: object) {
     return await this.http.post(this.baseUrl + '/api/v1/student-controller/updateStudentHistory', data).toPromise();
+  }
+
+  async getAllStudentHistory(studentId: number) {
+    return await this.http.get(this.baseUrl + '/api/v1/student-controller/getAllStudentHistory/' + studentId).toPromise();
   }
 }
