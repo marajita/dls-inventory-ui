@@ -52,6 +52,8 @@
                  (input)="dt.filter($event.target.value, col.field, 'contains')">
           <p-dropdown *ngSwitchCase="'programYear'" [options]="programYears" [style]="{'width':'100%'}"
                       (onChange)="dt.filter($event.value, col.field, 'equals')"></p-dropdown>
+          <input *ngSwitchCase="'laptopSn'" pInputText type="text"
+                 (input)="dt.filter($event.target.value, col.field, 'contains')">
         </th>
       </tr>
     </ng-template>

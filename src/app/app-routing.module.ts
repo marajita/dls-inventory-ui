@@ -6,6 +6,7 @@ import {FileUploadComponent} from "./file-upload/file-upload.component";
 
 
 const routes: Routes = [
+  { path: '', redirectTo: '/student', pathMatch: 'full' },
   { path: 'student', component: StudentComponent },
   { path: 'inventory-management', component: InventoryManagementComponent },
   { path: 'file-upload', component: FileUploadComponent },
