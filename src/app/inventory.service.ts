@@ -38,13 +38,13 @@ export class InventoryService {
     return await this.http.post(this.baseUrl + '/api/v1/inventory-controller/repairInventory', data).toPromise();
   }
 
-  async isInventoryInUse(data: object) {
-    return await this.http.post(this.baseUrl + '/api/v1/inventory-controller/isInventoryInUse', data).toPromise();
-  }
-
-  async assignInventory(data: object) {
-    return await this.http.post(this.baseUrl + '/api/v1/inventory-controller/assignInventory', data).toPromise();
-  }
+  // async isInventoryInUse(data: object) {
+  //   return await this.http.post(this.baseUrl + '/api/v1/inventory-controller/isInventoryInUse', data).toPromise();
+  // }
+  //
+  // async assignInventory(data: object) {
+  //   return await this.http.post(this.baseUrl + '/api/v1/inventory-controller/assignInventory', data).toPromise();
+  // }
 
   async updateInventoryHistory(data: object) {
     return await this.http.post(this.baseUrl + '/api/v1/inventory-controller/updateInventoryHistory', data).toPromise();

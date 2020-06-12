@@ -222,6 +222,9 @@ export class StudentComponent implements OnInit {
 
 
   onAssignInventoryClicked(rowData) {
+    this.inventoryAssignForm.reset();
+    this.inventoryRepairForm.reset();
+    this.studentHistoryForm.reset();
     console.log(rowData.inventory);
     this.studentId = rowData.studentId;
     this.assignedInventory = rowData.inventory;
@@ -304,6 +307,7 @@ export class StudentComponent implements OnInit {
       inventoryId: inventoryRecord.inventory.inventoryId
     }
     this.assignInventory(input);
+    this.assignedInventory = inventoryRecord.inventory;
     this.messageService.add({severity: 'success', summary: 'Success', detail: 'Laptop Assigned'});
 
   }
@@ -334,6 +338,7 @@ export class StudentComponent implements OnInit {
     console.log(inventoryRecord);
 
     this.inventoryService.repairInventory(inventoryRecord).then(data => {
+      this.getStudentHistory();
       this.messageService.add({severity: 'success', summary: 'Success', detail: 'Inventory Updated'});
     }).catch(data => {
       console.log(data);

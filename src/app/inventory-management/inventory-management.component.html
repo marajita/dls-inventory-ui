@@ -135,7 +135,7 @@
 
     </p-tabPanel>
     <p-tabPanel header="Manage Inventory" rightIcon="pi pi-inbox">
-      <h3>Current Inventory</h3>
+      <h3>Currently Assigned</h3>
       <div class="p-field">
         <label for="laptopSn" class="p-col-12 p-md-4">Net ID</label>
         <input disabled=true id="netId" type="text" class="p-col-12 p-md-6"
@@ -154,18 +154,18 @@
 
       <div>
         <div>
-          <p-button type="button" class="ui-button-raised" (onClick)="onInventoryAssignNewLaptopClicked()"
+          <p-button type="button" class="ui-button-raised" (onClick)="onInventoryAssignNewStudentClicked()"
                     label="Assign New Student"></p-button>
           <span>&nbsp;</span>
           <p-button type="button" class="ui-button-raised" (onClick)="onInventoryRepairClicked()"
                     label="Repair Inventory"></p-button>
         </div>
         <div *ngIf="enableInventoryAssignment">
-          <form [formGroup]="inventoryAssignForm" (ngSubmit)="onInventoryAssignNewLaptopSaved()">
+          <form [formGroup]="inventoryAssignForm" (ngSubmit)="onInventoryAssignNewStudentSaved()">
             <h3>Assign Inventory</h3>
             <div class="ui-fluid">
               <div class="p-field">
-                <p-dropdown [options]="studentList" formControlName="inventory" placeholder="Select Student"
+                <p-dropdown [options]="studentList" formControlName="student" placeholder="Select Student"
                             optionLabel="label" [showClear]="true" [filter]="true" required=true
                             class="p-col-12 p-md-4"></p-dropdown>
               </div>

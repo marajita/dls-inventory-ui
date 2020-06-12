@@ -44,4 +44,8 @@ export class StudentService {
   async getAllStudentHistory(studentId: number) {
     return await this.http.get(this.baseUrl + '/api/v1/student-controller/getAllStudentHistory/' + studentId).toPromise();
   }
+
+  async getStudentByInventoryId(inventoryId: number) {
+    return await this.http.get(this.baseUrl + '/api/v1/student-controller/getStudentByInventoryId/' + inventoryId).toPromise();
+  }
 }

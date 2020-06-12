@@ -2,6 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {MessageService, SelectItem} from "primeng/api";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {InventoryService} from "../inventory.service";
+import {StudentService} from "../student.service";
 
 @Component({
   selector: 'app-inventory-management',
@@ -10,7 +11,7 @@ import {InventoryService} from "../inventory.service";
 })
 export class InventoryManagementComponent implements OnInit {
 
-  constructor(private inventoryService: InventoryService, private messageService: MessageService) {
+  constructor(private inventoryService: InventoryService, private studentService: StudentService, private messageService: MessageService) {
   }
 
   inventoryList: any;
@@ -49,7 +50,7 @@ export class InventoryManagementComponent implements OnInit {
   });
 
   inventoryAssignForm = new FormGroup({
-    inventory: new FormControl('', Validators.required)
+    student: new FormControl('', Validators.required)
   });
 
   inventoryRepairForm = new FormGroup({
@@ -81,6 +82,12 @@ export class InventoryManagementComponent implements OnInit {
       {label: 'SPARE', value: 'SPARE'},
       {label: 'IN_USE', value: 'IN_USE'},
       {label: 'IN_REPAIR', value: 'IN_REPAIR'},
+    ];
+
+    this.inventoryHistoryCols = [
+      {field: 'createdDate', header: 'Activity Date'},
+      {field: 'comments', header: 'Comments'},
+
     ];
 
   }
@@ -145,13 +152,22 @@ export class InventoryManagementComponent implements OnInit {
   }
 
   onAssignInventoryClicked(rowData) {
-    console.log(rowData.inventory);
+    this.inventoryAssignForm.reset();
+    this.inventoryRepairForm.reset();
+    this.inventoryHistoryForm.reset();
+    console.log(rowData);
     this.inventoryId = rowData.inventoryId;
-    this.assignedStudent = rowData.inventory;
-    if(this.assignedStudent == null){
-      this.assignedStudent = {netId: '', lastname: '', firstname:'', email:''};
-    }
-    this.enableInventoryManagement = true;
+    this.assignedStudent = {netId: '', lastName: '', firstName:'', email:''};
+    this.studentService.getStudentByInventoryId(this.inventoryId).then(data => {
+      console.log(data);
+      if(data['student'] != null){
+        this.assignedStudent = data['student'];
+      }
+      this.enableInventoryManagement = true;
+    }).catch(data => {
+      console.log(data);
+    });
+
     this.getInventoryHistory();
   }
 
@@ -195,18 +211,18 @@ export class InventoryManagementComponent implements OnInit {
   }
 
 
-  onInventoryAssignNewLaptopClicked() {
+  onInventoryAssignNewStudentClicked() {
     this.enableInventoryRepair = false;
     //get spare inventory list
-    this.inventoryService.getAllSpareInventories().then(data => {
-      console.log(data["inventoryList"]);
-      const spareInvList = data["inventoryList"];
+    this.studentService.getAllStudents().then(data => {
+      console.log(data["studentList"]);
+      const stdList = data["studentList"];
       this.studentList = [];
 
-      for (let inv of spareInvList) {
-        inv.label = inv.laptopSn;
-        inv.value = inv;
-        this.studentList.push(inv);
+      for (let std of stdList) {
+        std.label = std.lastName + ', '+ std.firstName + ' - ' + std.netId;
+        std.value = std;
+        this.studentList.push(std);
       }
       console.log(this.studentList);
       this.enableInventoryAssignment = true;
@@ -217,14 +233,15 @@ export class InventoryManagementComponent implements OnInit {
   }
 
 
-  onInventoryAssignNewLaptopSaved() {
-    const inventoryRecord = Object.assign({}, this.inventoryAssignForm.value);
-    console.log(inventoryRecord);
+  onInventoryAssignNewStudentSaved() {
+    const studentRecord = Object.assign({}, this.inventoryAssignForm.value);
+    console.log(studentRecord);
     const input = {
       inventoryId: this.inventoryId,
-      // inventoryId: inventoryRecord.inventory.inventoryId
+      studentId: studentRecord.student.studentId
     }
     this.assignInventory(input);
+    this.assignedStudent = studentRecord['student'];
     this.messageService.add({severity: 'success', summary: 'Success', detail: 'Laptop Assigned'});
 
   }
@@ -236,7 +253,7 @@ export class InventoryManagementComponent implements OnInit {
   }
 
   assignInventory(data) {
-    this.inventoryService.assignInventory(data).then(r => {
+    this.studentService.assignInventory(data).then(r => {
       console.log(r)
     });
   }
@@ -250,11 +267,12 @@ export class InventoryManagementComponent implements OnInit {
   onInventoryRepairSaved() {
     const inventoryRecord = Object.assign({}, this.inventoryRepairForm.value);
     console.log(this.assignedStudent);
-    inventoryRecord.inventoryId = this.assignedStudent['studentId'];
+    inventoryRecord.inventoryId = this.inventoryId;
     inventoryRecord.status = 'IN_REPAIR';
     console.log(inventoryRecord);
 
     this.inventoryService.repairInventory(inventoryRecord).then(data => {
+      this.getInventoryHistory();
       this.messageService.add({severity: 'success', summary: 'Success', detail: 'Inventory Updated'});
     }).catch(data => {
       console.log(data);
