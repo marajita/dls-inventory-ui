@@ -83,14 +83,6 @@ export class StudentComponent implements OnInit {
 
     ];
 
-    this.programYears = [
-      {label: 'All', value: null},
-      {label: 'W2019', value: 'W2019'},
-      {label: 'G2019', value: 'G2019'},
-      {label: 'W2020', value: 'W2020'},
-      {label: 'G2020', value: 'G2020'},
-    ];
-
     this.studentHistoryCols = [
       // {field: 'netId', header: 'Net ID'},
       {field: 'createdDate', header: 'Activity Date'},
@@ -104,9 +96,26 @@ export class StudentComponent implements OnInit {
     this.studentService.getAllStudents().then((data: Array<any>) => {
       this.studentList = data["studentList"];
       console.log(this.studentList)
+      this.generateProgramYears(this.studentList);
     }).catch(data => {
       console.log(data);
     });
+  }
+
+  // generate program search dropdown
+  generateProgramYears(studentList: any[]) {
+    this.programYears = [];
+    let tempProgramYear: string[] = [];
+    for (let student of studentList) {
+      tempProgramYear.push(student.programYear);
+      const uniqueSet: Set<string> = new Set(tempProgramYear);
+      tempProgramYear = [...uniqueSet];
+    }
+    this.programYears.push({label: 'All', value: null});
+    for (let programYear of tempProgramYear) {
+      this.programYears.push({label: programYear, value: programYear})
+    }
+
   }
 
   onEditStudentClicked(rowData) {
@@ -244,8 +253,7 @@ export class StudentComponent implements OnInit {
     });
   }
 
-  onDeleteStudentClicked(rowData) {
-    this.studentId = rowData.studentId;
+  onDeleteStudentClicked() {
     this.enableStudentDeletePopup = true
   }
 
@@ -257,6 +265,7 @@ export class StudentComponent implements OnInit {
       console.log("updated");
       this.getAllStudents();
       this.enableStudentDeletePopup = false;
+      this.enableStudentPopup = false;
       this.messageService.add({severity: 'success', summary: 'Success', detail: 'Student Deleted'});
 
     }).catch(data => {
@@ -320,7 +329,7 @@ export class StudentComponent implements OnInit {
 
   assignInventory(data) {
     this.studentService.assignInventory(data).then(r => {
-      console.log(r)
+      this.getStudentHistory();
     });
   }
 
@@ -335,10 +344,13 @@ export class StudentComponent implements OnInit {
     console.log(this.assignedInventory);
     inventoryRecord.inventoryId = this.assignedInventory['inventoryId'];
     inventoryRecord.status = 'IN_REPAIR';
+    inventoryRecord.studentId = this.studentId;
     console.log(inventoryRecord);
 
     this.inventoryService.repairInventory(inventoryRecord).then(data => {
+      this.assignedInventory = {laptopSn: '', powerAdapterSn: ''};
       this.getStudentHistory();
+      this.inventoryRepairForm.reset();
       this.messageService.add({severity: 'success', summary: 'Success', detail: 'Inventory Updated'});
     }).catch(data => {
       console.log(data);

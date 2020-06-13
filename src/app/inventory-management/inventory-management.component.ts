@@ -180,8 +180,7 @@ export class InventoryManagementComponent implements OnInit {
     });
   }
 
-  onDeleteInventoryClicked(rowData) {
-    this.inventoryId = rowData.inventoryId;
+  onDeleteInventoryClicked() {
     this.enableInventoryDeletePopup = true
   }
 
@@ -193,6 +192,7 @@ export class InventoryManagementComponent implements OnInit {
       console.log("updated");
       this.getAllInventories();
       this.enableInventoryDeletePopup = false;
+      this.enableInventoryPopup = false;
     }).catch(data => {
       console.log(data);
     });
@@ -254,7 +254,7 @@ export class InventoryManagementComponent implements OnInit {
 
   assignInventory(data) {
     this.studentService.assignInventory(data).then(r => {
-      console.log(r)
+      this.getInventoryHistory();
     });
   }
 
@@ -269,10 +269,14 @@ export class InventoryManagementComponent implements OnInit {
     console.log(this.assignedStudent);
     inventoryRecord.inventoryId = this.inventoryId;
     inventoryRecord.status = 'IN_REPAIR';
+    inventoryRecord.studentId = this.assignedStudent['studentId'];
+
     console.log(inventoryRecord);
 
     this.inventoryService.repairInventory(inventoryRecord).then(data => {
+      this.assignedStudent = {netId: '', lastName: '', firstName:'', email:''};
       this.getInventoryHistory();
+      this.inventoryRepairForm.reset();
       this.messageService.add({severity: 'success', summary: 'Success', detail: 'Inventory Updated'});
     }).catch(data => {
       console.log(data);
