@@ -44,15 +44,18 @@
     </ng-template>
     <ng-template pTemplate="body" let-rowData let-columns="columns">
       <tr>
-        <td class="cell-breakWord" *ngFor="let col of cols">
+        <td> <span>
+          <a (click)="onEditInventoryClicked(rowData)" >{{ rowData['laptopSn'] }} </a>
+        </span></td>
+        <td class="cell-breakWord" *ngFor="let col of cols | slice:1; let i = index">
           {{rowData[col.field]}}
         </td>
         <td class="cell-max-width-4px p-col-2">
-          <button pButton icon="pi pi-times" class="ui-button-danger" (click)="onDeleteInventoryClicked(rowData)"
-                  style="margin-left: 0.5em;"></button>
-          <button pButton icon="pi pi-user-edit" (click)="onEditInventoryClicked(rowData)"
-                  style="margin-left: 0.5em;"></button>
-          <button pButton label="Assign" (click)="onAssignInventoryClicked(rowData)"
+<!--          <button pButton icon="pi pi-times" class="ui-button-danger" (click)="onDeleteInventoryClicked(rowData)"-->
+<!--                  style="margin-left: 0.5em;"></button>-->
+<!--          <button pButton icon="pi pi-user-edit" (click)="onEditInventoryClicked(rowData)"-->
+<!--                  style="margin-left: 0.5em;"></button>-->
+          <button pButton label="Update Student" (click)="onAssignInventoryClicked(rowData)"
                   style="margin-left: 0.5em;"></button>
         </td>
       </tr>
@@ -61,7 +64,7 @@
 </div>
 
 <p-dialog header="{{inventoryModalTitle}}" [(visible)]="enableInventoryPopup" [style]="{width: '650px'}">
-  <form [formGroup]="inventoryForm" (ngSubmit)="addOrEditInventory()">
+  <form [formGroup]="inventoryForm">
     <div class="ui-fluid">
       <div class="p-field">
         <label for="laptopSn" class="p-col-12 p-md-4">Laptop SN <span style="color: red">*</span></label>
@@ -81,8 +84,11 @@
         <span style="color: red"
               *ngIf="(registerFormControl.statusSelect.touched || submitted) && registerFormControl.statusSelect.errors?.required"> Value is required </span>
       </div>
-      <div class="p-field p-col-4">
-        <button pButton type="submit" label="Submit" [disabled]="!inventoryForm.valid"></button>
+      <div class="p-field p-col-4" style="display: inline-block">
+        <button pButton label="Submit" [disabled]="!inventoryForm.valid" (click)="addOrEditInventory()"></button></div>
+      <div class="p-field p-col-4" style="display: inline-block">
+      <button *ngIf="inventoryModalTitle === 'Edit Inventory'" pButton icon="pi pi-times" class="ui-button-danger" label="Delete Inventory" (click)="onDeleteInventoryClicked()"
+                          style="margin-left: 0.5em;"></button>
       </div>
 
     </div>

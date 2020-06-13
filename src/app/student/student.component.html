@@ -59,15 +59,19 @@
     </ng-template>
     <ng-template pTemplate="body" let-rowData let-columns="columns">
       <tr>
-        <td class="cell-breakWord" *ngFor="let col of cols">
+        <td> <span>
+          <a (click)="onEditStudentClicked(rowData)" >{{ rowData['netId'] }} </a>
+        </span></td>
+        <!--        <td class="cell-breakWord" *ngFor="let col of cols">-->
+        <td class="cell-breakWord" *ngFor="let col of cols | slice:1; let i = index">
           {{rowData[col.field]}}
         </td>
         <td class="cell-max-width-4px">
-          <button pButton icon="pi pi-times" class="ui-button-danger" (click)="onDeleteStudentClicked(rowData)"
-                  style="margin-left: 0.5em;"></button>
-          <button pButton icon="pi pi-user-edit" (click)="onEditStudentClicked(rowData)"
-                  style="margin-left: 0.5em;"></button>
-          <button pButton label="Assign" (click)="onAssignInventoryClicked(rowData)"
+<!--          <button pButton icon="pi pi-times" class="ui-button-danger" (click)="onDeleteStudentClicked(rowData)"-->
+<!--                  style="margin-left: 0.5em;"></button>-->
+<!--          <button pButton icon="pi pi-user-edit" (click)="onEditStudentClicked(rowData)"-->
+<!--                  style="margin-left: 0.5em;"></button>-->
+          <button pButton label="Update Inventory" (click)="onAssignInventoryClicked(rowData)"
                   style="margin-left: 0.5em;"></button>
         </td>
       </tr>
@@ -76,7 +80,7 @@
 </div>
 
 <p-dialog header="{{studentModalTitle}}" [(visible)]="enableStudentPopup" [style]="{width: '650px'}">
-  <form [formGroup]="studentForm" (ngSubmit)="addOrEditStudent()">
+  <form [formGroup]="studentForm">
     <div class="ui-fluid">
       <div class="p-field">
         <label for="netId" class="p-col-12 p-md-2">Net ID <span style="color: red">*</span></label>
@@ -116,9 +120,12 @@
         <span style="color: red"
               *ngIf="(registerFormControl.programYear.touched || submitted) && registerFormControl.programYear.errors?.required"> Value is required </span>
       </div>
-      <div class="p-field p-col-4">
-        <button pButton type="submit" label="Submit" [disabled]="!studentForm.valid"></button>
+      <div class="p-field p-col-4" style="display: inline-block">
+        <button pButton label="Submit" [disabled]="!studentForm.valid" (click)="addOrEditStudent()"></button>
       </div>
+      <div class="p-field p-col-4" style="display: inline-block">
+      <button *ngIf="studentModalTitle === 'Edit Student'" pButton class="ui-button-danger" label="Dematriculate" (click)="onDeleteStudentClicked()"
+              style="margin-left: 0.5em;"></button></div>
 
     </div>
 
