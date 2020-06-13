@@ -10,7 +10,7 @@ const httpOptions = {
 })
 export class StudentService {
 
-  private baseUrl = 'http://localhost:8080';
+  private baseUrl = 'https://dls-inventory-app.herokuapp.com';
 
   constructor(private http: HttpClient) {
 
