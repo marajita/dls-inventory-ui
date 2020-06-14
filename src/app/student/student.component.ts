@@ -5,6 +5,7 @@ import {FormControl, FormGroup, Validators} from "@angular/forms";
 
 import * as XLSX from "node_modules/xlsx/dist/xlsx.js";
 import {InventoryService} from "../inventory.service";
+import {Car} from "../domain/car";
 
 
 @Component({
@@ -169,34 +170,18 @@ export class StudentComponent implements OnInit {
 
   }
 
-
-  // exportExcel() {
-  //   console.log(this.getStudentsExport());
-  //   import("node_modules/xlsx/dist/xlsx.js").then(xlsx => {
-  //     const worksheet = xlsx.utils.json_to_sheet([
-  //       { A:"S", B:"h", C:"e", D:"e", E:"t", F:"J", G:"S" },
-  //       { A: 1,  B: 2,  C: 3,  D: 4,  E: 5,  F: 6,  G: 7  },
-  //       { A: 2,  B: 3,  C: 4,  D: 5,  E: 6,  F: 7,  G: 8  }
-  //     ], {header:["A","B","C","D","E","F","G"]});
-  //     const workbook = {Sheets: {'data': worksheet}, SheetNames: ['data']};
-  //     const excelBuffer: any = xlsx.write(workbook, {bookType: 'xlsx', type: 'array'});
-  //     this.saveAsExcelFile(excelBuffer, "student");
-  //   });
-  // }
-
   exportExcel() {
-    const fileName = 'test.xlsx';
-
-    const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(this.getStudentsExport());
-    const wb: XLSX.WorkBook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'test');
-
-    XLSX.writeFile(wb, fileName);
+    import("xlsx").then(xlsx => {
+      const worksheet = xlsx.utils.json_to_sheet(this.getStudentsExport());
+      const workbook = { Sheets: { 'data': worksheet }, SheetNames: ['data'] };
+      const excelBuffer: any = xlsx.write(workbook, { bookType: 'xlsx', type: 'array' });
+      this.saveAsExcelFile(excelBuffer, "Student");
+    });
   }
 
   saveAsExcelFile(buffer: any, fileName: string): void {
-    import("node_modules/file-saver/dist/FileSaver.js").then(FileSaver => {
-      let EXCEL_TYPE = 'application/vnd.ms-excel;charset=utf-8';
+    import("file-saver").then(FileSaver => {
+      let EXCEL_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
       let EXCEL_EXTENSION = '.xlsx';
       const data: Blob = new Blob([buffer], {
         type: EXCEL_TYPE
@@ -208,21 +193,15 @@ export class StudentComponent implements OnInit {
   getStudentsExport() {
     let students = [];
     for (let student of this.studentList) {
-      // student.netId = student.netId.toString();
-      // student.firstName = student.firstName.toString();
-      // student.lastName = student.lastName.toString();
-      // student.preferredName = student.preferredName.toString();
-      // student.dukeEmail = student.dukeEmail.toString();
-      // student.altEmail = student.altEmail.toString();
-      // student.programYear = student.programYear.toString();
       let std = {
-        netId: student.netId.toString(),
-        firstName: student.firstName.toString(),
-        lastName: student.lastName.toString(),
-        preferredName: student.preferredName.toString(),
-        dukeEmail: student.dukeEmail.toString(),
-        altEmail: student.altEmail.toString(),
-        programYear: student.programYear.toString()
+        netId: student.netId,
+        firstName: student.firstName,
+        lastName: student.lastName,
+        preferredName: student.preferredName,
+        dukeEmail: student.dukeEmail,
+        altEmail: student.altEmail,
+        programYear: student.programYear,
+        laptopSn:student.laptopSn
       }
       students.push(std);
     }
