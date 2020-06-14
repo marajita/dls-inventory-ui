@@ -2,10 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {StudentService} from "../student.service";
 import {MessageService, SelectItem} from 'primeng/api';
 import {FormControl, FormGroup, Validators} from "@angular/forms";
-
-import * as XLSX from "node_modules/xlsx/dist/xlsx.js";
 import {InventoryService} from "../inventory.service";
-import {Car} from "../domain/car";
 
 
 @Component({
@@ -173,8 +170,8 @@ export class StudentComponent implements OnInit {
   exportExcel() {
     import("xlsx").then(xlsx => {
       const worksheet = xlsx.utils.json_to_sheet(this.getStudentsExport());
-      const workbook = { Sheets: { 'data': worksheet }, SheetNames: ['data'] };
-      const excelBuffer: any = xlsx.write(workbook, { bookType: 'xlsx', type: 'array' });
+      const workbook = {Sheets: {'data': worksheet}, SheetNames: ['data']};
+      const excelBuffer: any = xlsx.write(workbook, {bookType: 'xlsx', type: 'array'});
       this.saveAsExcelFile(excelBuffer, "Student");
     });
   }
@@ -201,7 +198,7 @@ export class StudentComponent implements OnInit {
         dukeEmail: student.dukeEmail,
         altEmail: student.altEmail,
         programYear: student.programYear,
-        laptopSn:student.laptopSn
+        laptopSn: student.laptopSn
       }
       students.push(std);
     }
