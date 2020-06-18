@@ -13,6 +13,22 @@
                     style="margin-right: 0.5em;"></button>
             <button type="button" pButton icon="pi pi-file-excel" iconPos="left" label="EXCEL" (click)="exportExcel()"
                     style="margin-right: 0.5em;" class="ui-button-success"></button>
+            <button type="button" pButton icon="pi pi-file-excel" iconPos="left" label="Upload"
+                    (click)="enableUploadForm = true"
+                    style="margin-right: 0.5em;" class="ui-button-success"></button>
+            <form *ngIf="enableUploadForm" [formGroup]="uploadForm" (ngSubmit)="onUpload()">
+              <input size="60" formControlName="file" type="file" name="file"
+                     style="padding: 5px; background: ghostwhite" (change)="onFileChange($event)" multiple="false"
+                     accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"/>
+              <button type="submit" class="ui-button ui-button-raised" style="padding: 5px;margin-right: 0.5em;"
+                      [disabled]="uploadForm.invalid || uploadForm.pristine">Submit
+              </button>
+              <button type="button" class="ui-button ui-button-raised" style="padding: 5px"
+                      (click)="onCloseUpload()">Close
+              </button>
+
+            </form>
+            <span *ngIf="processMessage">{{processMessage}}</span>
           </div>
         </div>
         <div class="p-col-4">
@@ -53,10 +69,6 @@
           {{rowData[col.field]}}
         </td>
         <td class="cell-max-width-4px p-col-2">
-<!--          <button pButton icon="pi pi-times" class="ui-button-danger" (click)="onDeleteInventoryClicked(rowData)"-->
-<!--                  style="margin-left: 0.5em;"></button>-->
-<!--          <button pButton icon="pi pi-user-edit" (click)="onEditInventoryClicked(rowData)"-->
-<!--                  style="margin-left: 0.5em;"></button>-->
           <button pButton label="Update Student" (click)="onAssignInventoryClicked(rowData)"
                   style="margin-left: 0.5em;"></button>
         </td>
