@@ -3,6 +3,7 @@ import {StudentService} from "../student.service";
 import {MessageService, SelectItem} from 'primeng/api';
 import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {InventoryService} from "../inventory.service";
+import * as XLSX from "xlsx";
 
 
 @Component({
@@ -23,8 +24,10 @@ export class StudentComponent implements OnInit {
 
   enableStudentPopup: boolean = false;
   enableStudentDeletePopup: boolean = false;
+  enableUploadForm: boolean = false;
 
   studentModalTitle: string = "Loading..";
+  processMessage: string;
 
   submitted = false;
   programYears: SelectItem[];
@@ -62,12 +65,17 @@ export class StudentComponent implements OnInit {
     comments: new FormControl('', Validators.required)
   });
 
+  uploadForm = new FormGroup({
+    file: new FormControl(null, Validators.required)
+  })
+
 
   get registerFormControl() {
     return this.studentForm.controls;
   }
 
   ngOnInit(): void {
+    this.enableUploadForm = false;
     this.getAllStudents();
     this.cols = [
       {field: 'netId', header: 'Net ID'},
@@ -332,4 +340,48 @@ export class StudentComponent implements OnInit {
       console.log(data);
     });
   }
+
+  uploadedFiles: File[] = [];
+  file: any;
+
+  onFileChange(event) {
+    if (event.target.files.length > 0) {
+      this.uploadedFiles = event.target.files;
+      this.file = event.target.files[0];
+      console.log(this.file);
+      // this.form.get('file').setValue(file);
+    }
+  }
+
+  onUpload() {
+    this.processMessage = "Processing..."
+    const reader: FileReader = new FileReader();
+    reader.readAsBinaryString(this.file);
+    reader.onload = (e: any) => {
+      /* create workbook */
+      const binarystr: string = e.target.result;
+      const wb: XLSX.WorkBook = XLSX.read(binarystr, {type: 'binary'});
+
+      /* selected the first sheet */
+      const wsname: string = wb.SheetNames[0];
+      const ws: XLSX.WorkSheet = wb.Sheets[wsname];
+
+      /* save data */
+      const data = XLSX.utils.sheet_to_json(ws); // to get 2d array pass 2nd parameter as object {header: 1}
+      // console.log(data); // Data will be logged in array format containing objects
+      this.studentService.updateStudentFromUpload(data).then(data => {
+        this.getAllStudents();
+        this.messageService.add({severity: 'success', summary: 'Success', detail: 'Uploaded Successfully'});
+        this.processMessage = "Data processed successfully";
+      }).catch(data => {
+        console.log(data);
+      });
+    };
+  }
+
+  onCloseUpload() {
+    this.processMessage = null;
+    this.enableUploadForm = false;
+  }
+
 }

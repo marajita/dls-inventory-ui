@@ -53,4 +53,8 @@ export class InventoryService {
   async getAllInventoryHistory(inventoryId: number) {
     return await this.http.get(this.baseUrl + '/api/v1/inventory-controller/getAllInventoryHistory/' + inventoryId).toPromise();
   }
+
+  async insertInventoryFromUpload(data: object) {
+    return await this.http.post(this.baseUrl + '/api/v1/inventory-controller/insertInventoryFromUpload', data).toPromise();
+  }
 }

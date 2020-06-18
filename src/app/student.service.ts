@@ -48,4 +48,10 @@ export class StudentService {
   async getStudentByInventoryId(inventoryId: number) {
     return await this.http.get(this.baseUrl + '/api/v1/student-controller/getStudentByInventoryId/' + inventoryId).toPromise();
   }
+
+  async updateStudentFromUpload(data: object) {
+    return await this.http.post(this.baseUrl + '/api/v1/student-controller/updateStudentFromUpload', data).toPromise();
+  }
+
+
 }

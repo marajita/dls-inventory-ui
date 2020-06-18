@@ -1,22 +1,13 @@
+<p-panel header="Upload">
+  <form [formGroup]="uploadForm" (ngSubmit)="onSubmit()">
+      <input size="60" formControlName="file" type="file" name="file" (change)="onFileChange($event)" multiple="false"
+             accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"/>
+      <button pButton type="submit" [disabled]="uploadForm.invalid || uploadForm.pristine" label="Submit"></button>
+  </form>
 
-<div class="content-section implementation">
-  <p-toast></p-toast>
-
-  <h3 class="first">Advanced</h3>
-  <p-fileUpload name="demo[]" url="{{url}}" (onUpload)="onUpload($event)"
-                multiple="false" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" maxFileSize="1000000">
-    <ng-template pTemplate="content">
-      <ul *ngIf="uploadedFiles.length">
-        <li *ngFor="let file of uploadedFiles">{{file.name}} - {{file.size}} bytes</li>
-      </ul>
-    </ng-template>
-  </p-fileUpload>
-</div>
-
-
-<form method="POST" action="{{url}}" enctype="multipart/form-data">
-  <input type="file" name="file" /><br/><br/>
-  <input type="submit" value="Submit" />
-</form>
-
-
+  <ng-template pTemplate="content">
+    <ul *ngIf="uploadedFiles.length">
+      <li *ngFor="let file of uploadedFiles">{{file.name}} - {{file.size}} bytes</li>
+    </ul>
+  </ng-template>
+</p-panel>

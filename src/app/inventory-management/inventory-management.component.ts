@@ -3,6 +3,7 @@ import {MessageService, SelectItem} from "primeng/api";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {InventoryService} from "../inventory.service";
 import {StudentService} from "../student.service";
+import * as XLSX from "xlsx";
 
 @Component({
   selector: 'app-inventory-management',
@@ -22,8 +23,10 @@ export class InventoryManagementComponent implements OnInit {
   enableInventoryPopup: boolean = false;
   enableInventoryDeletePopup: boolean = false;
   showStatusDropdown: boolean = false;
+  enableUploadForm: boolean = false;
 
   inventoryModalTitle: string = "Loading..";
+  processMessage: string;
 
   submitted = false;
   statusList: SelectItem[]; // pop up dropdown
@@ -57,7 +60,9 @@ export class InventoryManagementComponent implements OnInit {
     comments: new FormControl('', Validators.required)
   });
 
-
+  uploadForm = new FormGroup({
+    file: new FormControl(null, Validators.required)
+  })
 
   get registerFormControl() {
     return this.inventoryForm.controls;
@@ -154,8 +159,8 @@ export class InventoryManagementComponent implements OnInit {
   exportExcel() {
     import("xlsx").then(xlsx => {
       const worksheet = xlsx.utils.json_to_sheet(this.getInventoriesExport());
-      const workbook = { Sheets: { 'data': worksheet }, SheetNames: ['data'] };
-      const excelBuffer: any = xlsx.write(workbook, { bookType: 'xlsx', type: 'array' });
+      const workbook = {Sheets: {'data': worksheet}, SheetNames: ['data']};
+      const excelBuffer: any = xlsx.write(workbook, {bookType: 'xlsx', type: 'array'});
       this.saveAsExcelFile(excelBuffer, "Inventory");
     });
   }
@@ -175,9 +180,9 @@ export class InventoryManagementComponent implements OnInit {
     let inventories = [];
     for (let inventory of this.inventoryList) {
       let inv = {
-        laptopSn:inventory.laptopSn,
-        powerAdapterSn:inventory.powerAdapterSn,
-        status:inventory.status
+        laptopSn: inventory.laptopSn,
+        powerAdapterSn: inventory.powerAdapterSn,
+        status: inventory.status
 
       }
       inventories.push(inv);
@@ -191,10 +196,10 @@ export class InventoryManagementComponent implements OnInit {
     this.inventoryHistoryForm.reset();
     console.log(rowData);
     this.inventoryId = rowData.inventoryId;
-    this.assignedStudent = {netId: '', lastName: '', firstName:'', email:''};
+    this.assignedStudent = {netId: '', lastName: '', firstName: '', email: ''};
     this.studentService.getStudentByInventoryId(this.inventoryId).then(data => {
       console.log(data);
-      if(data['student'] != null){
+      if (data['student'] != null) {
         this.assignedStudent = data['student'];
       }
       this.enableInventoryManagement = true;
@@ -254,7 +259,7 @@ export class InventoryManagementComponent implements OnInit {
       this.studentList = [];
 
       for (let std of stdList) {
-        std.label = std.lastName + ', '+ std.firstName + ' - ' + std.netId;
+        std.label = std.lastName + ', ' + std.firstName + ' - ' + std.netId;
         std.value = std;
         this.studentList.push(std);
       }
@@ -308,12 +313,58 @@ export class InventoryManagementComponent implements OnInit {
     console.log(inventoryRecord);
 
     this.inventoryService.repairInventory(inventoryRecord).then(data => {
-      this.assignedStudent = {netId: '', lastName: '', firstName:'', email:''};
+      this.assignedStudent = {netId: '', lastName: '', firstName: '', email: ''};
       this.getInventoryHistory();
       this.inventoryRepairForm.reset();
       this.messageService.add({severity: 'success', summary: 'Success', detail: 'Inventory Updated'});
     }).catch(data => {
       console.log(data);
     });
+  }
+
+  uploadedFiles: File[] = [];
+  file: any;
+
+  onFileChange(event) {
+    if (event.target.files.length > 0) {
+      this.uploadedFiles = event.target.files;
+      this.file = event.target.files[0];
+      console.log(this.file);
+      // this.form.get('file').setValue(file);
+    }
+  }
+
+  onUpload() {
+    this.processMessage = "Processing..."
+    const reader: FileReader = new FileReader();
+    reader.readAsBinaryString(this.file);
+    reader.onload = (e: any) => {
+      /* create workbook */
+      const binarystr: string = e.target.result;
+      const wb: XLSX.WorkBook = XLSX.read(binarystr, {type: 'binary'});
+
+      /* selected the first sheet */
+      const wsname: string = wb.SheetNames[0];
+      const ws: XLSX.WorkSheet = wb.Sheets[wsname];
+
+      /* save data */
+      const data = XLSX.utils.sheet_to_json(ws); // to get 2d array pass 2nd parameter as object {header: 1}
+      // console.log(data); // Data will be logged in array format containing objects
+      // data.forEach(data =>{
+      this.inventoryService.insertInventoryFromUpload(data).then(data => {
+        this.getAllInventories();
+        this.messageService.add({severity: 'success', summary: 'Success', detail: 'Uploaded Successfully'});
+        this.processMessage = "Data processed successfully"
+      }).catch(data => {
+        console.log(data);
+      });
+      // })
+
+    };
+  }
+
+  onCloseUpload() {
+    this.processMessage = null;
+    this.enableUploadForm = false;
   }
 }

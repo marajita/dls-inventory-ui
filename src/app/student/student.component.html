@@ -13,9 +13,22 @@
                     style="margin-right: 0.5em;"></button>
             <button type="button" pButton icon="pi pi-file-excel" iconPos="left" label="EXCEL" (click)="exportExcel()"
                     style="margin-right: 0.5em;" class="ui-button-success"></button>
-            <!--            <button type="button" pButton icon="pi pi-file-pdf" iconPos="left" label="PDF" (click)="exportPdf()"-->
-            <!--                    class="ui-button-warning" style="margin-right: 0.5em;"></button>-->
-            <!--        <button type="button" pButton icon="pi pi-file" iconPos="left" label="CSV - Selection Only" (click)="dt.exportCSV({selectionOnly:true})"></button>-->
+            <button type="button" pButton icon="pi pi-file-excel" iconPos="left" label="Upload"
+                    (click)="enableUploadForm = true"
+                    style="margin-right: 0.5em;" class="ui-button-success"></button>
+            <form *ngIf="enableUploadForm" [formGroup]="uploadForm" (ngSubmit)="onUpload()">
+              <input size="60" formControlName="file" type="file" name="file"
+                     style="padding: 5px; background: ghostwhite" (change)="onFileChange($event)" multiple="false"
+                     accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"/>
+              <button type="submit" class="ui-button ui-button-raised" style="padding: 5px;margin-right: 0.5em;"
+                      [disabled]="uploadForm.invalid || uploadForm.pristine">Submit
+              </button>
+              <button type="button" class="ui-button ui-button-raised" style="padding: 5px"
+                      (click)="onCloseUpload()">Close
+              </button>
+
+            </form>
+            <span *ngIf="processMessage">{{processMessage}}</span>
           </div>
         </div>
         <div class="p-col-4">
@@ -60,17 +73,17 @@
     <ng-template pTemplate="body" let-rowData let-columns="columns">
       <tr>
         <td> <span>
-          <a (click)="onEditStudentClicked(rowData)" >{{ rowData['netId'] }} </a>
+          <a (click)="onEditStudentClicked(rowData)">{{ rowData['netId'] }} </a>
         </span></td>
         <!--        <td class="cell-breakWord" *ngFor="let col of cols">-->
         <td class="cell-breakWord" *ngFor="let col of cols | slice:1; let i = index">
           {{rowData[col.field]}}
         </td>
         <td class="cell-max-width-4px">
-<!--          <button pButton icon="pi pi-times" class="ui-button-danger" (click)="onDeleteStudentClicked(rowData)"-->
-<!--                  style="margin-left: 0.5em;"></button>-->
-<!--          <button pButton icon="pi pi-user-edit" (click)="onEditStudentClicked(rowData)"-->
-<!--                  style="margin-left: 0.5em;"></button>-->
+          <!--          <button pButton icon="pi pi-times" class="ui-button-danger" (click)="onDeleteStudentClicked(rowData)"-->
+          <!--                  style="margin-left: 0.5em;"></button>-->
+          <!--          <button pButton icon="pi pi-user-edit" (click)="onEditStudentClicked(rowData)"-->
+          <!--                  style="margin-left: 0.5em;"></button>-->
           <button pButton label="Update Inventory" (click)="onAssignInventoryClicked(rowData)"
                   style="margin-left: 0.5em;"></button>
         </td>
@@ -124,8 +137,10 @@
         <button pButton label="Submit" [disabled]="!studentForm.valid" (click)="addOrEditStudent()"></button>
       </div>
       <div class="p-field p-col-4" style="display: inline-block">
-      <button *ngIf="studentModalTitle === 'Edit Student'" pButton class="ui-button-danger" label="Dematriculate" (click)="onDeleteStudentClicked()"
-              style="margin-left: 0.5em;"></button></div>
+        <button *ngIf="studentModalTitle === 'Edit Student'" pButton class="ui-button-danger" label="Dematriculate"
+                (click)="onDeleteStudentClicked()"
+                style="margin-left: 0.5em;"></button>
+      </div>
 
     </div>
 
