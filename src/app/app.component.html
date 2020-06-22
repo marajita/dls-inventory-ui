@@ -1,16 +1,10 @@
-<p-toolbar>
-  <div class="ui-toolbar-group-left">
-    <h4>DLS</h4>
-  </div>
-
-  <div class="ui-toolbar-group-right navigation-items">
-<!--    <span><a routerLink="/">Dashboard</a></span>-->
-    <span><a routerLink="/student">Students</a></span>
-    <span><a routerLink="/inventory-management">Inventory</a></span>
-    <!--    <span><a routerLink="/file-upload">Upload Files</a></span>-->
-  </div>
-</p-toolbar>
-
+<div>
+  <ul>
+    <li style="float:left; font-size: large; "><a routerLink="/">DLS</a></li>
+    <li style="float:right"><a routerLink="/inventory-management">Inventory</a></li>
+    <li style="float:right"><a routerLink="/student">Students</a></li>
+  </ul>
+</div>
 <main>
   <p-toast position="bottom-center"></p-toast>
   <router-outlet></router-outlet>
